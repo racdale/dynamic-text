@@ -7,7 +7,7 @@ asc <- function(x) { strtoi(charToRaw(x),16L) }
 chr <- function(n) { rawToChar(as.raw(n)) }
 
 # N^2 * RR = sum of squared frequencies * 100
-ws = as.character(paste(lapply(1:30,function(x) {
+ws = as.character(paste(lapply(1:50,function(x) {
   return(as.character(chr(round(runif(1)*5)+65)))
 }),collapse=' ')) # get a string of letters
 
@@ -32,8 +32,8 @@ sumSqFq * 100
 
 # entropy = Shannon entropy of n-gram distribution
 ents = c(); tents = c()
-for (i in 1:1000) {
-  ws = as.character(paste(lapply(1:30,function(x) {
+for (i in 1:100) {
+  ws = as.character(paste(lapply(1:40,function(x) {
     return(as.character(chr(round(runif(1)*5)+65)))
   }),collapse=' ')) # get a string of letters
   
@@ -61,10 +61,20 @@ for (i in 1:1000) {
   nGramList = nGramList[nGramList>0]
   
   ents = c(ents,res$ENT)
-  tents = c(tents,entropy(table(nchar(gsub(' ', '',names(nGramList))))))
+  distrib = table(nchar(gsub(' ', '',names(nGramList))))
+  distrib = hist(nchar(gsub(' ', '',names(nGramList))),plot=F)$counts
+  distrib = distrib / sum(distrib)  
+  distrib = distrib[distrib>0]
+  randDistrib = (rep(1/length(distrib),length(distrib)))
+  maxEnt = -1*sum(randDistrib*log2(randDistrib))
+  #thisEnt = entropy::entropy(distrib, unit='nats')
+  thisEnt = -1*sum(distrib*log2(distrib))
+  #tents = c(tents,thisEnt/maxEnt)
+  tents = c(tents,thisEnt)
+  #tents = c(tents,entropy::entropy(hist(nchar(gsub(' ', '',names(nGramList))),plot=F)$counts,unit='log2'))
 
 }
 plot(ents,tents)
-
+cor.test(ents,tents)
 
 
